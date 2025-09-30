@@ -1,0 +1,80 @@
+① learnings テーブル (学習内容の本体)
+
+カラム名	　　データ型	　　必須	説明
+id	　　　　　　INT	　　　　　　✅	　　　　連番
+title	　　　　　　VARCHAR(255)　　✅	　　　　タイトル
+explanatory_text　　TEXT		　　　　説明文
+category	　　VARCHAR(255)		カテゴリ
+understanding_level INT		　　　　　　　　理解度
+reference_url	　　TEXT		　　　　参考URL
+created_at	　　TIMESTAMP	　　✅	　　　　登録日時
+
+
+② tags テーブル (ハッシュタグ一覧)
+
+カラム名	データ型	必須	説明
+id	　　　　INT	　　　　✅	タグの連番
+name	　　　　VARCHAR(255)	✅	タグ名 (例: "MySQL")。重複しないように設定。
+
+
+③ learning_tags テーブル (両者を紐付け)
+
+カラム名	データ型	必須	説明
+learning_id	INT	　　　　✅	learningsテーブルのID
+tag_id	　　　　INT	　　　　✅	tagsテーブルのID
+
+④ categories テーブル
+
+カラム名	データ型　　　　必須	説明
+id	　　　　INT	　　　　✅　　　カテゴリーの連番 (主キー)
+name	　　　　VARCHAR(255)	✅　　　カテゴリー名 (例: "プログラミング")。重複しないように設定します。
+
+
+
+-- ① 学習内容の本体テーブル
+CREATE TABLE learnings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    explanatory_text TEXT,
+    category VARCHAR(255),
+    understanding_level INT,
+    reference_url TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ② タグ一覧テーブル
+CREATE TABLE tags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+-- ③ 中間テーブル
+CREATE TABLE learning_tags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    learning_id INT,
+    tag_id INT,
+    FOREIGN KEY (learning_id) REFERENCES learnings(id),
+    FOREIGN KEY (tag_id) REFERENCES tags(id)
+);
+
+-- 1. まずはcategory_idカラムを追加
+ALTER TABLE learnings ADD COLUMN category_id INT;
+
+-- 2. 外部キーとして設定
+ALTER TABLE learnings
+ADD CONSTRAINT fk_category
+FOREIGN KEY (category_id) REFERENCES categories(id);
+
+-- 3. (任意) 不要になった古いcategoryカラムを削除
+-- ALTER TABLE learnings DROP COLUMN category;
+
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+        INNER JOIN learning_tags ON learnings.id = learning_tags.learning_id
+        INNER JOIN tags ON tags.id = learning_tags.tag_id
+
+githubカラムを追加
+ALTER TABLE learnings ADD COLUMN github_path TEXT;
